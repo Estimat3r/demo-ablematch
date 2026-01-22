@@ -1,338 +1,339 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ABLE MATCH - Professional Career Platform</title>
-  
-  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
-  
-  <script src="https://cdn.tailwindcss.com"></script>
-  
-  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-  
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ABLE MATCH - Professional Career Platform</title>
+    <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        body { font-family: 'Pretendard', sans-serif; transition: all 0.3s ease; }
+        .hidden { display: none !important; }
+        
+        /* 고대비 모드 */
+        .high-contrast { background-color: #000000 !important; color: #FFFF00 !important; }
+        .high-contrast * { border-color: #FFFFFF !important; }
+        .high-contrast .bg-navy-700, .high-contrast .bg-white, .high-contrast .bg-gray-50 { background-color: #000000 !important; color: #FFFF00 !important; }
+        .high-contrast button { background-color: #000000 !important; color: #FFFF00 !important; border: 2px solid #FFFF00 !important; }
+        .high-contrast button:hover { background-color: #FFFF00 !important; color: #000000 !important; }
 
-  <style>
-    body { font-family: 'Pretendard', sans-serif; transition: background-color 0.3s, color 0.3s; }
-    
-    /* 접근성: 고대비 모드 */
-    .high-contrast { background-color: #000000 !important; color: #FFFF00 !important; }
-    .high-contrast div, .high-contrast header, .high-contrast aside, .high-contrast main, .high-contrast section { background-color: #000000 !important; border-color: #FFFFFF !important; }
-    .high-contrast h1, .high-contrast h2, .high-contrast h3, .high-contrast p, .high-contrast span, .high-contrast a, .high-contrast li, .high-contrast strong { color: #FFFF00 !important; }
-    .high-contrast button { background-color: #000000 !important; color: #FFFF00 !important; border: 2px solid #FFFF00 !important; }
-    .high-contrast button:hover { background-color: #FFFF00 !important; color: #000000 !important; }
-    .high-contrast input, .high-contrast textarea { background-color: #000000 !important; color: #FFFF00 !important; border: 2px solid #FFFF00 !important; }
-    
-    /* 애니메이션 */
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
-  </style>
+        /* 애니메이션 */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+    </style>
 </head>
-<body class="bg-gray-50 text-gray-900">
-  
-  <div id="error-message" style="display:none; padding:40px; color:red; font-weight:bold; text-align:center; background: #fff;">
-    ⚠️ 사이트 로딩 중 문제가 발생했습니다.<br>
-    인터넷 연결을 확인하거나, 브라우저의 '새로고침'을 눌러주세요.<br>
-    <span id="error-detail" style="font-size:12px; color:#555; font-weight:normal;"></span>
-  </div>
+<body id="app-body" class="bg-gray-50 text-gray-900">
 
-  <div id="root"></div>
-
-  <script type="text/babel">
-    // 안전장치: React가 실행되지 않으면 에러 메시지 표시
-    window.onerror = function(message, source, lineno, colno, error) {
-      document.getElementById('root').style.display = 'none';
-      const errorDiv = document.getElementById('error-message');
-      errorDiv.style.display = 'block';
-      document.getElementById('error-detail').innerText = `Error: ${message}`;
-    };
-
-    try {
-      const { useState, useEffect } = React;
-
-      // --- 목업 데이터 ---
-      const MOCK_JOBS = [
-        { id: 1, company: "LG 에너지솔루션", role: "R&D 데이터 분석 연구원", location: "서울 마곡", match: 98, badges: ["전공 일치", "재택 가능", "배리어프리 인증"], commute: "🚇 저상버스 40분", detail: "본사 1층 전 구역 턱 없음. 휠체어 전용 엘리베이터 4기 운행.", thumb1: "🏢 경사로 완비", thumb2: "🚽 전용 화장실" },
-        { id: 2, company: "Kakao", role: "백엔드 서버 개발자", location: "판교", match: 94, badges: ["스킬 일치", "유연 근무", "장애인 화장실"], commute: "🏠 완전 재택 근무", detail: "전사 재택 근무 권장. 판교 오피스 전체 배리어프리 인증(BF 최우수).", thumb1: "💻 원격 근무", thumb2: "☕ 사내 카페" },
-        { id: 3, company: "Samsung SDS", role: "클라우드 엔지니어", location: "서울 잠실", match: 91, badges: ["자격증 우대", "통근 버스", "식사 지원"], commute: "🚐 휠체어 리프트 셔틀", detail: "잠실 사옥 장애인 전용 엘리베이터 및 리프트 장착 셔틀버스 운행.", thumb1: "🚌 셔틀버스", thumb2: "🍽️ 구내식당" }
-      ];
-
-      const MOCK_POSTS_INIT = [
-        { id: 1, user: "현직 개발자 멘토", tag: "취업후기", time: "1시간 전", content: "휠체어 유저로서 재택/출근 하이브리드 근무 팁 공유합니다. 회사와 협의할 때...", likes: 45, comments: 12 },
-        { id: 2, user: "데이터분석가 지망생", tag: "스터디", time: "3시간 전", content: "데이터 분석가 포트폴리오 스터디 모집합니다 (3/4). 매주 토요일 온라인 진행.", likes: 23, comments: 8 }
-      ];
-
-      // --- 아이콘 컴포넌트 (SVG 직접 렌더링으로 외부 의존성 제거) ---
-      const Icon = ({ name, size = 20, className = "" }) => {
-        const icons = {
-          User: <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>,
-          Briefcase: <rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>,
-          MessageSquare: <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>,
-          Bell: <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>,
-          Eye: <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>,
-          Type: <polyline points="4 7 4 4 20 4 20 7"/><line x1="9" x2="15" y1="20" y2="20"/><line x1="12" x2="12" y1="4" y2="20"/>,
-          CheckCircle: <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>,
-          MapPin: <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>,
-          Search: <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>,
-          Upload: <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/>,
-          X: <path d="M18 6 6 18"/><path d="m6 6 12 12"/>,
-          Heart: <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5 4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>,
-          LogOut: <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/>,
-          Star: <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-        };
-
-        return (
-          <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-            {icons[name] || <circle cx="12" cy="12" r="10"/>}
-          </svg>
-        );
-      };
-
-      // --- 메인 앱 ---
-      const App = () => {
-        const [view, setView] = useState('landing');
-        const [isLoading, setIsLoading] = useState(false);
-        const [loadingStep, setLoadingStep] = useState(0);
-        const [activeTab, setActiveTab] = useState('matching');
-        const [isHighContrast, setIsHighContrast] = useState(false);
-        const [isLargeFont, setIsLargeFont] = useState(false);
-        const [showJobModal, setShowJobModal] = useState(null);
-        const [posts, setPosts] = useState(MOCK_POSTS_INIT);
-        const [newPost, setNewPost] = useState("");
-        const [toast, setToast] = useState(null);
-        const [showNoti, setShowNoti] = useState(false);
-        const [showProfile, setShowProfile] = useState(false);
-
-        const showToast = (msg) => {
-          setToast(msg);
-          setTimeout(() => setToast(null), 3000);
-        };
-
-        const handleStart = () => {
-          setIsLoading(true);
-          setLoadingStep(0);
-          setTimeout(() => setLoadingStep(1), 1000);
-          setTimeout(() => setLoadingStep(2), 2000);
-          setTimeout(() => setLoadingStep(3), 3000);
-          setTimeout(() => {
-            setIsLoading(false);
-            setView('dashboard');
-            showToast("박지성님 환영합니다! 맞춤형 공고가 준비되었습니다.");
-          }, 4000);
-        };
-
-        const handlePostSubmit = () => {
-          if (!newPost.trim()) return;
-          setPosts([{ id: Date.now(), user: "김에이블 (나)", tag: "자유", time: "방금 전", content: newPost, likes: 0, comments: 0 }, ...posts]);
-          setNewPost("");
-          showToast("게시글이 등록되었습니다.");
-        };
-
-        return (
-          <div className={`min-h-screen flex flex-col font-sans transition-all duration-300 ${isHighContrast ? 'high-contrast' : ''} ${isLargeFont ? 'text-xl' : 'text-base'}`}>
+    <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-gray-200" id="main-header">
+        <div class="container mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2 cursor-pointer" onclick="goHome()">
+                <div class="w-9 h-9 rounded flex items-center justify-center font-bold text-xl bg-[#1A365D] text-white app-logo-bg">A</div>
+                <span class="text-2xl font-bold tracking-tight text-[#1A365D] app-logo-text">ABLE MATCH</span>
+            </div>
             
-            {/* 헤더 */}
-            <header className={`sticky top-0 z-40 border-b ${isHighContrast ? 'border-white bg-black' : 'bg-white/90 border-gray-200 backdrop-blur-md'}`}>
-              <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-                <div className="flex items-center gap-2 cursor-pointer" onClick={() => setView('landing')}>
-                  <div className={`w-9 h-9 rounded flex items-center justify-center font-bold text-xl ${isHighContrast ? 'bg-yellow-400 text-black' : 'bg-[#1A365D] text-white'}`}>A</div>
-                  <span className={`text-2xl font-bold tracking-tight ${isHighContrast ? 'text-yellow-400' : 'text-[#1A365D]'}`}>ABLE MATCH</span>
+            <div class="flex items-center gap-3">
+                <div class="flex items-center bg-gray-100 rounded-lg p-1 mr-2 access-tool">
+                    <button onclick="toggleFontSize()" class="p-2 rounded hover:bg-white transition-colors" title="글자 확대"><i data-lucide="type"></i></button>
+                    <button onclick="toggleHighContrast()" class="p-2 rounded hover:bg-white transition-colors" title="고대비 모드"><i data-lucide="eye"></i></button>
                 </div>
-                
-                <div className="flex items-center gap-3">
-                  <div className={`flex items-center rounded-lg p-1 mr-2 ${isHighContrast ? 'border border-yellow-400' : 'bg-gray-100'}`}>
-                    <button onClick={() => setIsLargeFont(!isLargeFont)} className="p-2 rounded hover:bg-white transition-colors" title="글자 확대"><Icon name="Type" size={18}/></button>
-                    <button onClick={() => setIsHighContrast(!isHighContrast)} className="p-2 rounded hover:bg-white transition-colors" title="고대비 모드"><Icon name="Eye" size={18}/></button>
-                  </div>
-                  {view === 'dashboard' && (
-                    <div className="flex items-center gap-3">
-                      <button onClick={() => setShowNoti(!showNoti)} className="relative p-2 hover:bg-gray-100 rounded-full transition-colors">
-                        <Icon name="Bell" />
-                        <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
-                      </button>
-                      {showNoti && (
-                        <div className="absolute top-16 right-16 w-64 bg-white shadow-lg rounded-xl border p-2 z-50 text-sm animate-fade-in">
-                            <div className="p-2 border-b font-bold bg-gray-50">알림</div>
-                            <div className="p-2 hover:bg-gray-50 cursor-pointer">📢 삼성전자 서류 합격</div>
-                            <div className="p-2 hover:bg-gray-50 cursor-pointer">💬 멘토님의 댓글</div>
-                        </div>
-                      )}
-                      <button onClick={() => setShowProfile(!showProfile)} className="w-9 h-9 rounded-full bg-gray-300 overflow-hidden border-2 border-white focus:ring-2">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="User" />
-                      </button>
-                      {showProfile && (
-                        <div className="absolute top-16 right-4 w-48 bg-white shadow-lg rounded-xl border p-2 z-50 text-sm animate-fade-in">
-                            <div className="p-2 border-b font-bold">박지성 <span className="text-xs font-normal text-gray-500">Data Analyst</span></div>
-                            <button onClick={() => setView('landing')} className="w-full text-left p-2 text-red-500 hover:bg-gray-50 flex items-center gap-2"><Icon name="LogOut" size={14}/> 로그아웃</button>
-                        </div>
-                      )}
+
+                <div id="dashboard-menu" class="hidden flex items-center gap-3">
+                    <button onclick="toggleNoti()" class="relative p-2 hover:bg-gray-100 rounded-full transition-colors">
+                        <i data-lucide="bell"></i>
+                        <span class="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+                    </button>
+                    <div id="noti-popup" class="hidden absolute top-16 right-16 w-64 bg-white shadow-lg rounded-xl border p-2 z-50 text-sm animate-fade-in">
+                        <div class="p-2 border-b font-bold bg-gray-50">알림</div>
+                        <div class="p-2 hover:bg-gray-50 cursor-pointer">📢 삼성전자 서류 합격</div>
+                        <div class="p-2 hover:bg-gray-50 cursor-pointer">💬 멘토님의 댓글</div>
                     </div>
-                  )}
-                  {view === 'landing' && <button onClick={handleStart} className={`px-4 py-2 rounded-lg font-bold text-sm ${isHighContrast ? 'bg-yellow-400 text-black' : 'bg-[#1A365D] text-white hover:bg-[#152C4E]'}`}>로그인</button>}
+
+                    <button onclick="toggleProfile()" class="w-9 h-9 rounded-full bg-gray-300 overflow-hidden border-2 border-white focus:ring-2">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="User">
+                    </button>
+                    <div id="profile-popup" class="hidden absolute top-16 right-4 w-48 bg-white shadow-lg rounded-xl border p-2 z-50 text-sm animate-fade-in">
+                        <div class="p-2 border-b font-bold">박지성 <span class="text-xs font-normal text-gray-500">Data Analyst</span></div>
+                        <button onclick="goHome()" class="w-full text-left p-2 text-red-500 hover:bg-gray-50 flex items-center gap-2"><i data-lucide="log-out" class="w-4 h-4"></i> 로그아웃</button>
+                    </div>
                 </div>
-              </div>
-            </header>
 
-            {/* AI 로딩 모달 */}
-            {isLoading && (
-              <div className="fixed inset-0 bg-black/80 z-[100] flex flex-col items-center justify-center text-white backdrop-blur-sm">
-                <div className="w-20 h-20 border-4 border-[#38B2AC] border-t-transparent rounded-full animate-spin mb-6"></div>
-                <h2 className="text-3xl font-bold animate-pulse">
-                  {loadingStep === 0 && "📄 이력서 스캔 중..."}
-                  {loadingStep === 1 && "🧠 직무 역량 분석 중..."}
-                  {loadingStep === 2 && "♿ 배리어프리 매칭 중..."}
-                  {loadingStep === 3 && "✨ 최적의 기업 발견!"}
-                </h2>
-              </div>
-            )}
+                <button id="login-btn" onclick="startSimulation()" class="px-4 py-2 rounded-lg font-bold text-sm bg-[#1A365D] text-white hover:bg-[#152C4E]">로그인</button>
+            </div>
+        </div>
+    </header>
 
-            {/* 직무 상세 모달 */}
-            {showJobModal && (
-              <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
-                <div className={`w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden ${isHighContrast ? 'bg-black border-2 border-white' : 'bg-white'}`}>
-                  <div className="p-6 border-b flex justify-between items-start">
+    <section id="view-landing" class="relative overflow-hidden py-24 text-center">
+        <div class="container mx-auto px-4 relative z-10">
+            <span class="inline-block py-1 px-3 rounded-full bg-teal-50 text-teal-700 font-bold mb-6 text-sm border border-teal-200">Professional Career Platform</span>
+            <h1 class="text-5xl md:text-7xl font-extrabold mb-8 leading-tight">신체적 제약이 아닌,<br/><span class="text-[#38B2AC] highlight-text">당신의 전문성</span>으로 평가받는 곳.</h1>
+            <p class="text-xl text-gray-600 mb-10 max-w-2xl mx-auto">AI가 당신의 전공, 학력, 프로젝트 이력을 분석하여<br/>최적의 커리어 로드맵을 제안합니다.</p>
+            <button onclick="startSimulation()" class="group text-white text-xl font-bold py-5 px-10 rounded-2xl shadow-xl transition-transform hover:-translate-y-1 inline-flex items-center gap-3 bg-[#1A365D] hover:bg-[#152C4E]">
+                <i data-lucide="upload"></i> 이력서 업로드하고 AI 매칭 시작
+            </button>
+            
+            <div class="mt-20 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto text-left">
+                <div class="p-6 rounded-2xl border bg-white border-gray-100 shadow-sm">
+                    <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-4 bg-blue-50 text-[#1A365D]"><i data-lucide="briefcase"></i></div>
+                    <h3 class="font-bold text-lg mb-2">기술 중심 매칭</h3><p class="text-sm opacity-70">장애 유형보다 보유 기술 스택을 우선 매칭합니다.</p>
+                </div>
+                <div class="p-6 rounded-2xl border bg-white border-gray-100 shadow-sm">
+                    <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-4 bg-blue-50 text-[#1A365D]"><i data-lucide="map-pin"></i></div>
+                    <h3 class="font-bold text-lg mb-2">배리어프리 검증</h3><p class="text-sm opacity-70">실제 근무 환경 접근성 데이터를 시각화합니다.</p>
+                </div>
+                <div class="p-6 rounded-2xl border bg-white border-gray-100 shadow-sm">
+                    <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-4 bg-blue-50 text-[#1A365D]"><i data-lucide="message-square"></i></div>
+                    <h3 class="font-bold text-lg mb-2">현직자 커뮤니티</h3><p class="text-sm opacity-70">직무별 멘토링과 생생한 취업 정보를 공유하세요.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="view-dashboard" class="hidden container mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <aside class="lg:col-span-3 space-y-6 animate-fade-in">
+            <div class="rounded-2xl shadow-sm border p-6 relative overflow-hidden bg-white border-gray-200">
+                <div class="absolute top-0 left-0 w-full h-20 bg-[#1A365D]"></div>
+                <div class="relative flex flex-col items-center mt-8">
+                    <div class="w-24 h-24 rounded-full border-4 border-white bg-gray-200 mb-4 overflow-hidden"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="User"></div>
+                    <h2 class="text-xl font-bold">박지성</h2>
+                    <p class="text-sm text-gray-500">Data Analyst</p>
+                    <span class="mt-2 px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full">Open to Work</span>
+                    <div class="mt-6 w-full pt-6 border-t text-sm space-y-2">
+                        <div class="flex justify-between"><span>전공</span><span class="font-bold">컴퓨터공학</span></div>
+                        <div class="flex justify-between"><span>학점</span><span class="font-bold">4.0 / 4.5</span></div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <div class="lg:col-span-6 space-y-6 animate-fade-in">
+            <div class="flex rounded-xl p-1 shadow-sm border bg-white">
+                <button onclick="switchTab('matching')" id="tab-matching" class="flex-1 py-3 font-bold rounded-lg flex items-center justify-center gap-2 bg-[#1A365D] text-white shadow"><i data-lucide="briefcase" class="w-4 h-4"></i> AI 직무 매칭</button>
+                <button onclick="switchTab('community')" id="tab-community" class="flex-1 py-3 font-bold rounded-lg flex items-center justify-center gap-2 text-gray-500"><i data-lucide="message-square" class="w-4 h-4"></i> 커뮤니티</button>
+            </div>
+
+            <div id="content-matching" class="space-y-4">
+                <div class="p-4 rounded-xl flex items-center justify-between shadow-sm bg-gradient-to-r from-[#1A365D] to-[#2C5282] text-white">
                     <div>
-                      <h2 className="text-2xl font-bold">{MOCK_JOBS.find(j => j.id === showJobModal)?.company}</h2>
-                      <p className="flex items-center gap-1 text-gray-500"><Icon name="MapPin" size={16}/> {MOCK_JOBS.find(j => j.id === showJobModal)?.location}</p>
+                        <p class="text-xs font-bold opacity-70 mb-1">AI ANALYSIS COMPLETE</p>
+                        <h3 class="font-bold text-lg">상위 1% 적합 기업을 찾았습니다.</h3>
                     </div>
-                    <button onClick={() => setShowJobModal(null)}><Icon name="X" /></button>
-                  </div>
-                  <div className="p-6 space-y-6 max-h-[60vh] overflow-y-auto">
-                    <div className="bg-gray-100 rounded-xl p-6 text-center border-2 border-dashed border-gray-300">
-                        <div className="text-4xl mb-2">🗺️</div>
-                        <p className="font-bold text-gray-600">배리어프리 이동 동선 지도</p>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-gray-100 h-24 rounded-lg flex items-center justify-center font-bold text-gray-500 border">{MOCK_JOBS.find(j => j.id === showJobModal)?.thumb1}</div>
-                        <div className="bg-gray-100 h-24 rounded-lg flex items-center justify-center font-bold text-gray-500 border">{MOCK_JOBS.find(j => j.id === showJobModal)?.thumb2}</div>
-                    </div>
-                    <p className="leading-relaxed">{MOCK_JOBS.find(j => j.id === showJobModal)?.detail}</p>
-                  </div>
-                  <div className="p-6 border-t flex gap-3">
-                    <button onClick={() => setShowJobModal(null)} className="flex-1 py-3 rounded-xl font-bold border hover:bg-gray-50">닫기</button>
-                    <button onClick={() => { setShowJobModal(null); showToast("지원완료! 서류 검토가 시작됩니다."); }} className={`flex-1 py-3 rounded-xl font-bold text-white ${isHighContrast ? 'bg-yellow-400 text-black' : 'bg-[#38B2AC]'}`}>지원하기</button>
-                  </div>
+                    <div class="bg-white/10 p-2 rounded-lg"><i data-lucide="briefcase"></i></div>
                 </div>
-              </div>
-            )}
 
-            {/* 토스트 메시지 */}
-            {toast && (
-              <div className="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-[#1A365D] text-white px-6 py-3 rounded-full shadow-2xl z-[70] animate-fade-in flex items-center gap-2">
-                <Icon name="CheckCircle" className="text-green-400" /> {toast}
-              </div>
-            )}
-
-            {/* 메인 콘텐츠 */}
-            <main className="flex-grow">
-              {view === 'landing' ? (
-                <div className="relative overflow-hidden py-24 text-center">
-                  <div className="container mx-auto px-4">
-                      <span className="inline-block py-1 px-3 rounded-full bg-teal-50 text-teal-700 font-bold mb-6 text-sm border border-teal-200">Professional Career Platform</span>
-                      <h1 className="text-5xl md:text-7xl font-extrabold mb-8 leading-tight">신체적 제약이 아닌,<br/><span className={isHighContrast ? "text-yellow-400" : "text-[#38B2AC]"}>당신의 전문성</span>으로 평가받는 곳.</h1>
-                      <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto">AI가 당신의 전공, 학력, 프로젝트 이력을 분석하여<br/>최적의 커리어 로드맵을 제안합니다.</p>
-                      <button onClick={handleStart} className={`group text-white text-xl font-bold py-5 px-10 rounded-2xl shadow-xl transition-transform hover:-translate-y-1 inline-flex items-center gap-3 ${isHighContrast ? 'bg-yellow-400 text-black' : 'bg-[#1A365D]'}`}>
-                        <Icon name="Upload" /> 이력서 업로드하고 AI 매칭 시작
-                      </button>
-                  </div>
+                <div class="rounded-xl border p-6 relative overflow-hidden transition-shadow hover:shadow-md bg-white border-gray-200">
+                    <div class="absolute top-0 right-0 p-4"><span class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded-full">적합도 98%</span></div>
+                    <h3 class="text-lg font-bold mb-1">R&D 데이터 분석 연구원</h3>
+                    <p class="text-sm text-gray-500 mb-4">LG 에너지솔루션 • 서울 마곡</p>
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="text-xs bg-gray-100 px-2 py-1 rounded flex items-center gap-1"><i data-lucide="check-circle" class="w-3 h-3"></i> 전공 일치</span>
+                        <span class="text-xs bg-gray-100 px-2 py-1 rounded flex items-center gap-1"><i data-lucide="check-circle" class="w-3 h-3"></i> 재택 가능</span>
+                    </div>
+                    <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
+                        <span class="text-sm font-bold flex items-center gap-1 text-[#38B2AC] bg-teal-50 px-3 py-1 rounded-lg"><i data-lucide="map-pin" class="w-3 h-3"></i> 🚇 저상버스 40분</span>
+                        <button onclick="openModal('LG 에너지솔루션', '본사 1층 전 구역 턱 없음.')" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg font-bold text-sm text-gray-700">상세 보기</button>
+                    </div>
                 </div>
-              ) : (
-                <div className="container mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
-                  {/* 사이드바 */}
-                  <aside className="lg:col-span-3 space-y-6 animate-fade-in">
-                    <div className={`rounded-2xl shadow-sm border p-6 relative overflow-hidden ${isHighContrast ? 'border-white' : 'bg-white border-gray-200'}`}>
-                      <div className={`absolute top-0 left-0 w-full h-20 ${isHighContrast ? 'bg-gray-800' : 'bg-[#1A365D]'}`}></div>
-                      <div className="relative flex flex-col items-center mt-8">
-                        <div className="w-24 h-24 rounded-full border-4 border-white bg-gray-200 mb-4 overflow-hidden"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="User" /></div>
-                        <h2 className="text-xl font-bold">박지성</h2>
-                        <p className="text-sm text-gray-500">Data Analyst</p>
-                        <span className="mt-2 px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full">Open to Work</span>
-                        <div className="mt-6 w-full pt-6 border-t text-sm space-y-2">
-                          <div className="flex justify-between"><span>전공</span><span className="font-bold">컴퓨터공학</span></div>
-                          <div className="flex justify-between"><span>학점</span><span className="font-bold">4.0 / 4.5</span></div>
-                        </div>
-                      </div>
-                    </div>
-                  </aside>
-                  
-                  {/* 중앙 피드 */}
-                  <div className="lg:col-span-6 space-y-6 animate-fade-in">
-                    <div className="flex rounded-xl p-1 shadow-sm border bg-white">
-                      <button onClick={() => setActiveTab('matching')} className={`flex-1 py-3 font-bold rounded-lg flex items-center justify-center gap-2 ${activeTab === 'matching' ? (isHighContrast ? 'bg-yellow-400 text-black' : 'bg-[#1A365D] text-white') : 'text-gray-500'}`}><Icon name="Briefcase"/> AI 직무 매칭</button>
-                      <button onClick={() => setActiveTab('community')} className={`flex-1 py-3 font-bold rounded-lg flex items-center justify-center gap-2 ${activeTab === 'community' ? (isHighContrast ? 'bg-yellow-400 text-black' : 'bg-[#1A365D] text-white') : 'text-gray-500'}`}><Icon name="MessageSquare"/> 커뮤니티</button>
-                    </div>
 
-                    {activeTab === 'matching' ? (
-                      <div className="space-y-4">
-                        {MOCK_JOBS.map(job => (
-                          <div key={job.id} className={`rounded-xl border p-6 relative overflow-hidden transition-shadow hover:shadow-md ${isHighContrast ? 'border-white' : 'bg-white border-gray-200'}`}>
-                            <div className="absolute top-0 right-0 p-4"><span className="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded-full">적합도 {job.match}%</span></div>
-                            <h3 className="text-lg font-bold mb-1">{job.role}</h3>
-                            <p className="text-sm text-gray-500 mb-4">{job.company} • {job.location}</p>
-                            <div className="flex flex-wrap gap-2 mb-4">
-                              {job.badges.map((b, i) => <span key={i} className="text-xs bg-gray-100 px-2 py-1 rounded flex items-center gap-1"><Icon name="CheckCircle" size={12}/>{b}</span>)}
+                <div class="rounded-xl border p-6 relative overflow-hidden transition-shadow hover:shadow-md bg-white border-gray-200">
+                    <div class="absolute top-0 right-0 p-4"><span class="bg-green-100 text-green-800 text-xs font-bold px-2 py-1 rounded-full">적합도 94%</span></div>
+                    <h3 class="text-lg font-bold mb-1">백엔드 서버 개발자</h3>
+                    <p class="text-sm text-gray-500 mb-4">Kakao • 판교</p>
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="text-xs bg-gray-100 px-2 py-1 rounded flex items-center gap-1"><i data-lucide="check-circle" class="w-3 h-3"></i> 스킬 일치</span>
+                        <span class="text-xs bg-gray-100 px-2 py-1 rounded flex items-center gap-1"><i data-lucide="check-circle" class="w-3 h-3"></i> 장애인 화장실</span>
+                    </div>
+                    <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
+                        <span class="text-sm font-bold flex items-center gap-1 text-[#38B2AC] bg-teal-50 px-3 py-1 rounded-lg"><i data-lucide="home" class="w-3 h-3"></i> 🏠 완전 재택 근무</span>
+                        <button onclick="openModal('Kakao', '전사 재택 근무 권장. 판교 오피스 BF 최우수 등급.')" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg font-bold text-sm text-gray-700">상세 보기</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="content-community" class="hidden space-y-4">
+                <div class="p-4 rounded-xl border bg-white border-gray-200">
+                    <textarea id="post-input" placeholder="동료들에게 커리어 고민을 나눠보세요..." class="w-full p-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-[#38B2AC] resize-none bg-gray-50" rows="3"></textarea>
+                    <div class="flex justify-end mt-2"><button onclick="addPost()" class="px-5 py-2 rounded-lg font-bold text-white bg-[#38B2AC] hover:bg-[#319795]">작성하기</button></div>
+                </div>
+                <div id="post-list" class="space-y-4">
+                    <div class="p-5 rounded-xl border bg-white border-gray-200">
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-xs">Dev</div>
+                                <div><p class="font-bold text-sm">현직 개발자 멘토</p><p class="text-xs text-gray-400">1시간 전</p></div>
                             </div>
-                            <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
-                              <span className="text-sm font-bold flex items-center gap-1 text-[#38B2AC] bg-teal-50 px-3 py-1 rounded-lg"><Icon name="MapPin" size={14}/> {job.commute}</span>
-                              <button onClick={() => setShowJobModal(job.id)} className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg font-bold text-sm text-gray-700">상세 보기</button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        <div className={`p-4 rounded-xl border ${isHighContrast ? 'border-white' : 'bg-white border-gray-200'}`}>
-                          <textarea value={newPost} onChange={(e) => setNewPost(e.target.value)} placeholder="동료들에게 커리어 고민을 나눠보세요..." className="w-full p-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-[#38B2AC] resize-none bg-gray-50" rows="3"></textarea>
-                          <div className="flex justify-end mt-2"><button onClick={handlePostSubmit} className={`px-5 py-2 rounded-lg font-bold text-white ${isHighContrast ? 'bg-yellow-400 text-black' : 'bg-[#38B2AC]'}`}>작성하기</button></div>
+                            <span class="text-xs bg-gray-100 px-2 py-1 rounded">취업후기</span>
                         </div>
-                        {posts.map(post => (
-                          <div key={post.id} className={`p-5 rounded-xl border ${isHighContrast ? 'border-white' : 'bg-white border-gray-200'}`}>
-                              <div className="flex justify-between items-start mb-2">
-                                <div className="flex items-center gap-2">
-                                  <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center font-bold text-xs">User</div>
-                                  <div><p className="font-bold text-sm">{post.user}</p><p className="text-xs text-gray-400">{post.time}</p></div>
-                                </div>
-                                <span className="text-xs bg-gray-100 px-2 py-1 rounded">{post.tag}</span>
-                              </div>
-                              <p className="text-sm mb-4">{post.content}</p>
-                              <div className="flex gap-4 text-xs text-gray-500"><button className="flex items-center gap-1 text-red-500"><Icon name="Heart" size={14} className="fill-current"/> {post.likes}</button><button className="flex items-center gap-1"><Icon name="MessageSquare" size={14}/> {post.comments}</button></div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* 오른쪽 사이드바 */}
-                  <aside className="lg:col-span-3 space-y-6 animate-fade-in">
-                    <div className={`rounded-2xl shadow-sm border p-6 text-center ${isHighContrast ? 'border-white' : 'bg-white border-gray-200'}`}>
-                      <h3 className="font-bold mb-4 flex items-center justify-center gap-2"><Icon name="Star" className="text-yellow-400" fill="currentColor"/> 내 역량 분석</h3>
-                      <div className="w-32 h-32 mx-auto rounded-full border-4 border-[#38B2AC] flex flex-col items-center justify-center"><span className="text-xl font-bold">Top 15%</span></div>
+                        <p class="text-sm mb-4">휠체어 유저로서 재택/출근 하이브리드 근무 팁 공유합니다. 회사와 협의할 때...</p>
+                        <div class="flex gap-4 text-xs text-gray-500 font-bold">
+                            <button class="flex items-center gap-1 text-red-500"><i data-lucide="heart" class="w-3 h-3 fill-current"></i> 45</button>
+                            <button class="flex items-center gap-1"><i data-lucide="message-square" class="w-3 h-3"></i> 12</button>
+                        </div>
                     </div>
-                    <div className={`rounded-2xl shadow-sm border p-6 text-white ${isHighContrast ? 'bg-black border-white' : 'bg-[#1A365D]'}`}>
-                      <h3 className="font-bold mb-2">Upskilling Plan</h3>
-                      <p className="text-xs opacity-80 mb-4">매칭률을 5% 더 높일 수 있는 추천 강의입니다.</p>
-                      <a href="https://www.udemy.com" target="_blank" className={`block text-center py-2 rounded font-bold ${isHighContrast ? 'bg-yellow-400 text-black' : 'bg-[#38B2AC]'}`}>강의 확인하기</a>
-                    </div>
-                  </aside>
                 </div>
-              )}
-            </main>
+            </div>
+        </div>
+
+        <aside class="lg:col-span-3 space-y-6 animate-fade-in">
+            <div class="rounded-2xl shadow-sm border p-6 text-center bg-white border-gray-200">
+                <h3 class="font-bold mb-4 flex items-center justify-center gap-2"><i data-lucide="star" class="text-yellow-400 w-5 h-5 fill-current"></i> 내 역량 분석</h3>
+                <div class="w-32 h-32 mx-auto rounded-full border-4 border-[#38B2AC] flex flex-col items-center justify-center"><span class="text-xl font-bold">Top 15%</span></div>
+                <p class="text-xs text-gray-400 mt-2">시장 평균 대비</p>
+            </div>
+            <div class="rounded-2xl shadow-sm border p-6 text-white bg-[#1A365D]">
+                <h3 class="font-bold mb-2">Upskilling Plan</h3>
+                <p class="text-xs opacity-80 mb-4">매칭률을 5% 더 높일 수 있는 추천 강의입니다.</p>
+                <a href="https://www.udemy.com" target="_blank" class="block text-center py-2 rounded font-bold bg-[#38B2AC]">강의 확인하기</a>
+            </div>
+        </aside>
+    </section>
+
+    <div id="modal-loading" class="hidden fixed inset-0 bg-black/80 z-[100] flex flex-col items-center justify-center text-white backdrop-blur-sm">
+        <div class="w-20 h-20 border-4 border-[#38B2AC] border-t-transparent rounded-full animate-spin mb-6"></div>
+        <h2 id="loading-text" class="text-3xl font-bold animate-pulse">📄 이력서 스캔 중...</h2>
+    </div>
+
+    <div id="modal-job" class="hidden fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
+        <div class="w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden bg-white">
+            <div class="p-6 border-b flex justify-between items-start bg-gray-50">
+                <div>
+                    <h2 id="job-title" class="text-2xl font-bold mb-1">Company Name</h2>
+                    <p class="flex items-center gap-1 text-gray-500"><i data-lucide="map-pin" class="w-4 h-4"></i> 서울</p>
+                </div>
+                <button onclick="closeModal()" class="p-2 hover:bg-gray-200 rounded-full"><i data-lucide="x"></i></button>
+            </div>
+            <div class="p-6 space-y-6">
+                <div class="bg-gray-100 rounded-xl p-8 flex flex-col items-center justify-center text-center border-2 border-dashed border-gray-300">
+                    <div class="text-4xl mb-2">🗺️</div>
+                    <p class="font-bold text-gray-600">배리어프리 이동 동선 지도</p>
+                </div>
+                <p id="job-detail" class="leading-relaxed text-gray-600"></p>
+            </div>
+            <div class="p-6 border-t bg-gray-50 flex gap-3">
+                <button onclick="closeModal()" class="flex-1 py-3 rounded-xl font-bold border border-gray-300 hover:bg-gray-100">닫기</button>
+                <button onclick="closeModal(); showToast('지원완료! 서류 검토가 시작됩니다.');" class="flex-1 py-3 rounded-xl font-bold text-white bg-[#38B2AC] hover:bg-[#319795]">지원하기</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="hidden fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-[#1A365D] text-white px-6 py-4 rounded-full shadow-2xl z-[70] animate-fade-in flex items-center gap-3">
+        <div class="bg-green-400 rounded-full p-1"><i data-lucide="check" class="w-4 h-4 text-[#1A365D]"></i></div>
+        <span id="toast-text" class="font-bold">메시지</span>
+    </div>
+
+    <script>
+        // 아이콘 로딩
+        lucide.createIcons();
+
+        // 상태 변수
+        let isHighContrast = false;
+        let isLargeFont = false;
+
+        // 기능 함수들
+        function toggleFontSize() {
+            isLargeFont = !isLargeFont;
+            document.body.classList.toggle('text-xl', isLargeFont);
+            document.body.classList.toggle('text-base', !isLargeFont);
+        }
+
+        function toggleHighContrast() {
+            isHighContrast = !isHighContrast;
+            document.body.classList.toggle('high-contrast', isHighContrast);
+        }
+
+        function toggleNoti() { document.getElementById('noti-popup').classList.toggle('hidden'); }
+        function toggleProfile() { document.getElementById('profile-popup').classList.toggle('hidden'); }
+        
+        function goHome() {
+            document.getElementById('view-landing').classList.remove('hidden');
+            document.getElementById('view-dashboard').classList.add('hidden');
+            document.getElementById('login-btn').classList.remove('hidden');
+            document.getElementById('dashboard-menu').classList.add('hidden');
+        }
+
+        function startSimulation() {
+            document.getElementById('modal-loading').classList.remove('hidden');
+            const texts = ["📄 이력서 스캔 중...", "🧠 직무 역량 분석 중...", "♿ 배리어프리 매칭 중...", "✨ 최적의 기업 발견!"];
+            let step = 0;
+            const interval = setInterval(() => {
+                step++;
+                if(step >= texts.length) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        document.getElementById('modal-loading').classList.add('hidden');
+                        document.getElementById('view-landing').classList.add('hidden');
+                        document.getElementById('view-dashboard').classList.remove('hidden');
+                        document.getElementById('login-btn').classList.add('hidden');
+                        document.getElementById('dashboard-menu').classList.remove('hidden');
+                        showToast("박지성님 환영합니다!");
+                    }, 1000);
+                } else {
+                    document.getElementById('loading-text').innerText = texts[step];
+                }
+            }, 1000);
+        }
+
+        function switchTab(tab) {
+            if(tab === 'matching') {
+                document.getElementById('content-matching').classList.remove('hidden');
+                document.getElementById('content-community').classList.add('hidden');
+                document.getElementById('tab-matching').classList.add('bg-[#1A365D]', 'text-white', 'shadow');
+                document.getElementById('tab-matching').classList.remove('text-gray-500');
+                document.getElementById('tab-community').classList.remove('bg-[#1A365D]', 'text-white', 'shadow');
+                document.getElementById('tab-community').classList.add('text-gray-500');
+            } else {
+                document.getElementById('content-matching').classList.add('hidden');
+                document.getElementById('content-community').classList.remove('hidden');
+                document.getElementById('tab-community').classList.add('bg-[#1A365D]', 'text-white', 'shadow');
+                document.getElementById('tab-community').classList.remove('text-gray-500');
+                document.getElementById('tab-matching').classList.remove('bg-[#1A365D]', 'text-white', 'shadow');
+                document.getElementById('tab-matching').classList.add('text-gray-500');
+            }
+        }
+
+        function openModal(title, detail) {
+            document.getElementById('job-title').innerText = title;
+            document.getElementById('job-detail').innerText = detail;
+            document.getElementById('modal-job').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('modal-job').classList.add('hidden');
+        }
+
+        function showToast(msg) {
+            document.getElementById('toast-text').innerText = msg;
+            document.getElementById('toast').classList.remove('hidden');
+            setTimeout(() => {
+                document.getElementById('toast').classList.add('hidden');
+            }, 3000);
+        }
+
+        function addPost() {
+            const input = document.getElementById('post-input');
+            const text = input.value.trim();
+            if(!text) return;
             
-            <footer className="py-8 text-center text-sm text-gray-500 border-t mt-auto"><p>&copy; 2024 Able Match Corp.</p></footer>
-          </div>
-        );
-      };
-
-      const root = ReactDOM.createRoot(document.getElementById('root'));
-      root.render(<App />);
-
-    } catch (err) {
-      console.error(err);
-      document.getElementById('error-message').style.display = 'block';
-      document.getElementById('error-detail').innerText = err.message;
-    }
-  </script>
+            const list = document.getElementById('post-list');
+            const newPost = document.createElement('div');
+            newPost.className = "p-5 rounded-xl border bg-white border-gray-200 animate-fade-in";
+            newPost.innerHTML = `
+                <div class="flex justify-between items-start mb-2">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center font-bold text-xs">Me</div>
+                        <div><p class="font-bold text-sm">김에이블</p><p class="text-xs text-gray-400">방금 전</p></div>
+                    </div>
+                    <span class="text-xs bg-gray-100 px-2 py-1 rounded">자유</span>
+                </div>
+                <p class="text-sm mb-4">${text}</p>
+                <div class="flex gap-4 text-xs text-gray-500"><button class="flex items-center gap-1 text-red-500"><i data-lucide="heart" class="w-3 h-3"></i> 0</button></div>
+            `;
+            list.prepend(newPost);
+            input.value = "";
+            showToast("게시글이 등록되었습니다.");
+            lucide.createIcons(); // 아이콘 새로고침
+        }
+    </script>
 </body>
 </html>
